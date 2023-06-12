@@ -8,14 +8,15 @@ sv_help = '''
 [扔漂流瓶] 把你的话装进漂流瓶内,会被谁捡到呢？
 [捡漂流瓶] 看看里面有啥
 '''
-lmt = DailyNumberLimiter(5)
+tlmt = DailyNumberLimiter(1)
+plmt = DailyNumberLimiter(3)
 sv = Service('漂流瓶',help_=sv_help)
 
 @sv.on_prefix('扔漂流瓶')
 async def drop_bottle(bot,ev:CQEvent):
     uid = ev.user_id
-    if not lmt.check(f't{uid}'):
-        await bot.send(ev,'一天只能扔5个漂流瓶哦',at_sender = True)
+    if not tlmt.check(f't{uid}'):
+        await bot.send(ev,'今天已经扔过漂流瓶啦，请明天再来',at_sender = True)
         return
     msg = str(ev.message)
     try:
@@ -26,7 +27,7 @@ async def drop_bottle(bot,ev:CQEvent):
         if not id:
             await bot.send(ev,'忽然间狂风大作,扔出的漂流瓶撞碎在礁石上,它再也没有被捡起的机会了')
             return
-        lmt.increase(f't{uid}')
+        tlmt.increase(f't{uid}')
         await bot.send(ev,f'你刚刚送走了第{id}个漂流瓶，它将带着你的故事，飘向未知的远方')
     except Exception as e:
         await bot.send(ev,f'今天不是扔漂流瓶的好日子，改天再来吧\n({e})')
@@ -34,8 +35,8 @@ async def drop_bottle(bot,ev:CQEvent):
 @sv.on_fullmatch('捡漂流瓶')
 async def get_bottle(bot,ev:CQEvent):
     uuid = ev.user_id
-    if not lmt.check(f'p{uuid}'):
-        await bot.send(ev,'一天只能捡5个漂流瓶哦',at_sender = True)
+    if not plmt.check(f'p{uuid}'):
+        await bot.send(ev,'一天只能捡3个漂流瓶哦',at_sender = True)
         return
     try:
         msg,comm,time,gid,uid,id = await get_drift(bot)
@@ -54,7 +55,7 @@ async def get_bottle(bot,ev:CQEvent):
         else:
             message += f'发送者{uid}\n——————————\n'
         message += f'{msg}\n——————————\n{comm}(此漂流瓶已被捡起{time}次,回复此消息可以评论)'
-        lmt.increase(f'p{uuid}')
+        plmt.increase(f'p{uuid}')
         await bot.send(ev,message)
     except Exception as e:
         await bot.send(ev,f'捡到一个破碎的瓶子,里面的东西早已被海水腐蚀，无法辨认\n({e})')

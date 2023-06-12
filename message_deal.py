@@ -16,6 +16,8 @@ def beautiful(msg: str) -> str:
 
 async def doing_img(bot, img: str, is_ans: bool = False, save: bool = False) -> str:
     img_path = os.path.join(FILE_PATH, 'img/')
+    if not exists(img_path):
+        makedirs(img_path)
     if save:
         try:
             img_url = await bot.get_image(file=img)

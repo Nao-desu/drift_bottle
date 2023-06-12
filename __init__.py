@@ -1,7 +1,7 @@
 from hoshino import Service,logger
 from hoshino.typing import CQEvent
 import os,re
-from message_deal import *
+from .message_deal import *
 FILE_PATH = os.path.dirname(__file__)
 sv_help = '''
 [扔漂流瓶] 把你的话装进漂流瓶内,会被谁捡到呢？

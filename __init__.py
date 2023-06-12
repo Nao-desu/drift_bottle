@@ -15,11 +15,11 @@ async def drop_bottle(bot,ev:CQEvent):
     msg = ev.message.extract_plain_text().strip()
     try:
         if not msg:
-            await bot.send('这个瓶子空空如也,消失在海面上')
+            await bot.send(ev,'这个瓶子空空如也,消失在海面上')
             return
         id= await msg_save(bot,uid = ev.user_id,gid = ev.group_id,msg=msg)
         if not id:
-            await bot.send('忽然间狂风大作,扔出的漂流瓶撞碎在礁石上,它再也没有被捡起的机会了')
+            await bot.send(ev,'忽然间狂风大作,扔出的漂流瓶撞碎在礁石上,它再也没有被捡起的机会了')
             return
         await bot.send(ev,f'你刚刚送走了第{id}个漂流瓶，它将带着你的故事，飘向未知的远方')
     except Exception as e:

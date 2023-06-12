@@ -58,16 +58,16 @@ async def msg_save(bot,uid,gid,msg):
         if not exists(join(FILE_PATH,f'bottle')):#创建bottle文件夹
             makedirs(join(FILE_PATH,f'bottle'))
         msg = html.unescape(msg)
-        msg = adjust_img(bot,msg,False,True)
+        msg = await adjust_img(bot,msg,False,True)
         if not exists(join(FILE_PATH,f'bottle/data.json')):
-            data = {
+            data = [{
                 'msg' : msg,
                 'uid' : uid,
                 'gid' : gid,
                 'id'  : 1,
                 'time' : 0,
                 'comment' : ''     
-            }
+            }]
             with open(join(FILE_PATH,f'bottle/data.json'),'w') as f:
                 json.dump([data],f,indent=4, ensure_ascii=False)
             return 1
@@ -109,7 +109,7 @@ async def get_drift(bot):#msg,comm,time,gid,uid,id
         bottle_list[order] = bottle
         with open(FILE_PATH,f'bottle/data.json','w') as f:
             json.dump(bottle_list,f,indent=4, ensure_ascii=False)
-        msg = adjust_img(bot,bottle['msg'],True,False)
+        msg = await adjust_img(bot,bottle['msg'],True,False)
         if not bottle['comment']:
             comm = ''
         else:

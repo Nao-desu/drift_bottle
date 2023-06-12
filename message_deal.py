@@ -66,13 +66,13 @@ async def msg_save(bot,uid,gid,msg):
                 'gid' : gid,
                 'id'  : 1,
                 'time' : 0,
-                'comment' : ''     
+                'comment' : []     
             }]
-            with open(join(FILE_PATH,f'bottle/data.json'),'w') as f:
-                json.dump([data],f,indent=4, ensure_ascii=False)
+            with open(join(FILE_PATH,f'bottle/data.json'),'w',encoding='utf-8') as f:
+                json.dump(data,f,indent=4, ensure_ascii=False)
             return 1
         else: 
-            with open(join(FILE_PATH,f'bottle/data.json'),'r') as f:
+            with open(join(FILE_PATH,f'bottle/data.json'),'r',encoding='utf-8') as f:
                 data_list = json.load(f)
             id = data_list[-1]['id']+1
             data = {
@@ -84,7 +84,7 @@ async def msg_save(bot,uid,gid,msg):
                 'comment' : []
             }
             data_list.append(data)
-            with open(join(FILE_PATH,f'bottle/data.json'),'w') as f:
+            with open(join(FILE_PATH,f'bottle/data.json'),'w',encoding='utf-8') as f:
                 json.dump(data_list,f,indent=4, ensure_ascii=False)
             return id
     except:
@@ -101,13 +101,13 @@ async def get_drift(bot):#msg,comm,time,gid,uid,id
     try:
         if not exists(join(FILE_PATH,f'bottle/data.json')):
             return '','',0,0,0,False
-        with open(FILE_PATH,f'bottle/data.json','r') as f:
+        with open(join(FILE_PATH,f'bottle/data.json'),'r',encoding='utf-8') as f:
             bottle_list = json.load(f)
-        order = random(0,len(bottle_list))
+        order = random.randint(0,len(bottle_list)-1)
         bottle = bottle_list[order]
         bottle['time']+=1
         bottle_list[order] = bottle
-        with open(FILE_PATH,f'bottle/data.json','w') as f:
+        with open(join(FILE_PATH,f'bottle/data.json'),'w',encoding='utf-8') as f:
             json.dump(bottle_list,f,indent=4, ensure_ascii=False)
         msg = await adjust_img(bot,bottle['msg'],True,False)
         if not bottle['comment']:
@@ -127,28 +127,26 @@ async def get_drift(bot):#msg,comm,time,gid,uid,id
     
 
 async def add_comm(bot,comment,id,uid):
-    with open(FILE_PATH,f'bottle/data.json','r') as f:
+    with open(join(FILE_PATH,f'bottle/data.json'),'r',encoding='utf-8') as f:
         bottle_list = json.load(f)
     check_id = False 
     for i in range(0,len(bottle_list)):
-        if i['id'] == i:
+        if bottle_list[i]['id'] == id:
             check_id = True
             break
     if not check_id:
-        return -1
+        return -1,0,0
     bottle = bottle_list[i]
     comm = bottle['comment']
     if len(comm) == 5:
-        len.remove(comm[0])
+        comm.remove(comm[0])
     comm.append(comment+f'({uid})')
     bottle_list[i]['comment'] = comm
-    with open(FILE_PATH,f'bottle/data.json','w') as f:
+    with open(join(FILE_PATH,f'bottle/data.json'),'w',encoding='utf-8') as f:
         json.dump(bottle_list,f,indent=4, ensure_ascii=False)
     id = bottle['id']
     ggid = bottle['gid']
     uuid = bottle['uid']
     if not check_member(bot,uuid,ggid):
-        return False
-    msg = f'[CQ:at,qq={uuid}]收到漂流瓶{id}的评论:\n{comm}'
-    await bot.send_group_message(group_id = ggid,message = msg)
-    return True
+        return False,0,0
+    return True,ggid,uuid

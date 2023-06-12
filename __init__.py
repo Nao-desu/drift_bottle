@@ -12,7 +12,7 @@ sv = Service('漂流瓶',help_=sv_help)
 
 @sv.on_prefix('扔漂流瓶')
 async def drop_bottle(bot,ev:CQEvent):
-    msg = ev.message.extract_plain_text().strip()
+    msg = str(ev.message)
     try:
         if not msg:
             await bot.send(ev,'这个瓶子空空如也,消失在海面上')
@@ -32,15 +32,15 @@ async def get_bottle(bot,ev:CQEvent):
         if not id:
             await bot.send(ev,'海面空空如也，等一段时间再来吧',at_sender = True)
             return
-        info = bot.get_stranger_info(uid)
-        ginfo = bot.get_group_info(gid)
+        info = await bot.get_stranger_info(self_id = ev.self_id,uesr_id = uid)
+        ginfo = await bot.get_group_info(self_id = ev.self_id,group_id = gid)
         message = f'bid:{id}\n'
-        if ginfo.group_name:
-            message += f'捡到来自群{bot.get_group_info(gid).group_name}({gid})的漂流瓶\n'
+        if ginfo['group_name']:
+            message += f'捡到来自群{ginfo["group_name"]}({gid})的漂流瓶\n'
         else:
             message += f'捡到来自群{gid}的漂流瓶\n'
-        if info.nickname:
-            message += f'发送者{info.nickname}{uid}\n————————————————————\n'
+        if info["nickname"]:
+            message += f'发送者{info["nickname"]}{uid}\n————————————————————\n'
         else:
             message += f'发送者{uid}\n————————————————————\n'
         message += f'{msg}\n————————————————————\n{comm}(此漂流瓶已被捡起{time}次,回复此消息可以评论)'
@@ -53,23 +53,28 @@ async def add_comment(bot,ev: CQEvent):
     try:
         sid = ev.self_id
         uid = ev.user_id
-        match = re.search(r"\[CQ:reply,id=([0-9]*)\]", str(ev.message))
+        gid = ev.group_id
+        match = re.search(r"\[CQ:reply,id=(-?[0-9]*)\]", str(ev.message))
         if not match:
             return
-        commatch = rf'\[CQ:reply,id=\d*\]\[CQ:at,qq={sid}\](.*)'
+        commatch = rf'\[CQ:reply,id=-?\d*\]\[CQ:at,qq={sid}\](.*)'
         comment = re.search(commatch,str(ev.message))
+        if not comment:
+            return
+        comment = comment.group(1).replace(f'[CQ:at,qq={sid}]', '').strip()
         mid = match.group(1)
-        message = bot.get_msg(mid)
-        if message.sender.userid == sid:
-            msg = str(message.message)
-            idmatch = r'^bid:\d*'
+        message = await bot.get_msg(self_id = sid,message_id = int(mid))
+        if message["sender"]["user_id"] == sid:
+            msg = str(message['message'])
+            idmatch = r'^bid:(\d*)'
             if re.match(idmatch,msg):
                 id = re.search(r'^bid:(\d*)',msg).group(1)
-                result = await add_comm(bot,comment,int(id),uid)
+                result,ggid,uuid = await add_comm(bot,comment,int(id),uid)
                 if not result:
                     await bot.send(ev,'你来晚了一步，他/她已经离开了这片海域。',at_sender = True)
                 if result == -1:
-                    return                
+                    return
+                await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶收到来自群{gid}：{uid}的评论:\n{comment}')              
                 await bot.send(ev,'评论成功') 
             else:return
         else:return

@@ -33,8 +33,8 @@ async def drop_bottle(bot,ev:CQEvent):
 
 @sv.on_fullmatch('捡漂流瓶')
 async def get_bottle(bot,ev:CQEvent):
-    uid = ev.user_id
-    if not lmt.check(f'p{uid}'):
+    uuid = ev.user_id
+    if not lmt.check(f'p{uuid}'):
         await bot.send(ev,'一天只能捡5个漂流瓶哦',at_sender = True)
         return
     try:
@@ -54,7 +54,7 @@ async def get_bottle(bot,ev:CQEvent):
         else:
             message += f'发送者{uid}\n——————————\n'
         message += f'{msg}\n——————————\n{comm}(此漂流瓶已被捡起{time}次,回复此消息可以评论)'
-        lmt.increase(f'p{uid}')
+        lmt.increase(f'p{uuid}')
         await bot.send(ev,message)
     except Exception as e:
         await bot.send(ev,f'捡到一个破碎的瓶子,里面的东西早已被海水腐蚀，无法辨认\n({e})')

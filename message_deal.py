@@ -135,7 +135,7 @@ async def add_comm(bot,comment,id,uid):
             check_id = True
             break
     if not check_id:
-        return -1,0,0
+        return -1,0,0,''
     bottle = bottle_list[i]
     comm = bottle['comment']
     if len(comm) == 5:
@@ -147,6 +147,7 @@ async def add_comm(bot,comment,id,uid):
     id = bottle['id']
     ggid = bottle['gid']
     uuid = bottle['uid']
+    msg = await adjust_img(bottle['msg'])
     if not check_member(bot,uuid,ggid):
-        return False,0,0
-    return True,ggid,uuid
+        return False,0,0,''
+    return True,ggid,uuid,msg

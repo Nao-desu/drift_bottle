@@ -69,12 +69,12 @@ async def add_comment(bot,ev: CQEvent):
             idmatch = r'^bid:(\d*)'
             if re.match(idmatch,msg):
                 id = re.search(r'^bid:(\d*)',msg).group(1)
-                result,ggid,uuid = await add_comm(bot,comment,int(id),uid)
+                result,ggid,uuid,msg = await add_comm(bot,comment,int(id),uid)
                 if not result:
                     await bot.send(ev,'你来晚了一步，他/她已经离开了这片海域。',at_sender = True)
                 if result == -1:
                     return
-                await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶收到来自群{gid}：{uid}的评论:\n{comment}')              
+                await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶id:{id}\n————————————————————\n{msg}\n————————————————————\n收到来自群{gid}：{uid}的评论:\n{comment}')              
                 await bot.send(ev,'评论成功') 
             else:return
         else:return

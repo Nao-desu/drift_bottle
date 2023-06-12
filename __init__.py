@@ -40,10 +40,10 @@ async def get_bottle(bot,ev:CQEvent):
         else:
             message += f'捡到来自群{gid}的漂流瓶\n'
         if info["nickname"]:
-            message += f'发送者{info["nickname"]}{uid}\n————————————————————\n'
+            message += f'发送者{info["nickname"]}{uid}\n——————————\n'
         else:
-            message += f'发送者{uid}\n————————————————————\n'
-        message += f'{msg}\n————————————————————\n{comm}(此漂流瓶已被捡起{time}次,回复此消息可以评论)'
+            message += f'发送者{uid}\n——————————\n'
+        message += f'{msg}\n——————————\n{comm}(此漂流瓶已被捡起{time}次,回复此消息可以评论)'
         await bot.send(ev,message)
     except Exception as e:
         await bot.send(ev,f'捡到一个破碎的瓶子,里面的东西早已被海水腐蚀，无法辨认\n({e})')
@@ -74,7 +74,7 @@ async def add_comment(bot,ev: CQEvent):
                     await bot.send(ev,'你来晚了一步，他/她已经离开了这片海域。',at_sender = True)
                 if result == -1:
                     return
-                await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶id:{id}\n————————————————————\n{msg}\n————————————————————\n收到来自群{gid}：{uid}的评论:\n{comment}')              
+                await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶id:{id}\n——————————\n{msg}\n——————————\n收到来自群{gid}：{uid}的评论:\n{comment}')              
                 await bot.send(ev,'评论成功') 
             else:return
         else:return

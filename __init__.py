@@ -1,7 +1,7 @@
 from hoshino import Service,logger
 from hoshino.typing import CQEvent
 from hoshino.util import DailyNumberLimiter
-import os,re
+import os,re,time
 from .message_deal import *
 FILE_PATH = os.path.dirname(__file__)
 sv_help = '''
@@ -9,7 +9,7 @@ sv_help = '''
 [捡漂流瓶] 看看里面有啥
 '''
 tlmt = DailyNumberLimiter(1)
-plmt = DailyNumberLimiter(3)
+plmt = DailyNumberLimiter(1)
 sv = Service('漂流瓶',help_=sv_help)
 
 @sv.on_prefix('扔漂流瓶')
@@ -36,7 +36,7 @@ async def drop_bottle(bot,ev:CQEvent):
 async def get_bottle(bot,ev:CQEvent):
     uuid = ev.user_id
     if not plmt.check(f'p{uuid}'):
-        await bot.send(ev,'一天只能捡3个漂流瓶哦',at_sender = True)
+        await bot.send(ev,'你今天已经捡过漂流瓶了哦,明天再来吧',at_sender = True)
         return
     try:
         msg,comm,time,gid,uid,id = await get_drift(bot)
@@ -87,6 +87,7 @@ async def add_comment(bot,ev: CQEvent):
                 if result == -1:
                     return
                 await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶id:{id}\n——————————\n{msg}\n——————————\n收到来自群{gid}：{uid}的评论:\n{comment}')              
+                time.sleep(3)
                 await bot.send(ev,'评论成功') 
             else:return
         else:return

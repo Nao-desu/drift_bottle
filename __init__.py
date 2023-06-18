@@ -10,6 +10,7 @@ sv_help = '''
 '''
 tlmt = DailyNumberLimiter(1)
 plmt = DailyNumberLimiter(1)
+clmt = DailyNumberLimiter(1)
 sv = Service('漂流瓶',help_=sv_help)
 
 @sv.on_prefix('扔漂流瓶')
@@ -80,12 +81,17 @@ async def add_comment(bot,ev: CQEvent):
             msg = str(message['message'])
             idmatch = r'^bid:(\d*)'
             if re.match(idmatch,msg):
+                if not clmt.check(f'c{uid}'):
+                    await bot.send(ev,'今天已经发表过评论啦，请明天再来',at_sender = True)
+                    return
                 id = re.search(r'^bid:(\d*)',msg).group(1)
                 result,ggid,uuid,msg = await add_comm(bot,comment,int(id),uid)
                 if not result:
                     await bot.send(ev,'你来晚了一步，他/她已经离开了这片海域。',at_sender = True)
+                    return
                 if result == -1:
                     return
+                clmt.increase(f'c{uid}')
                 await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶id:{id}\n——————————\n{msg}\n——————————\n收到来自群{gid}：{uid}的评论:\n{comment}')              
                 time.sleep(3)
                 await bot.send(ev,'评论成功') 

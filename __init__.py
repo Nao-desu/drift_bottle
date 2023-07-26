@@ -121,7 +121,7 @@ async def delete_drift(bot,ev:CQEvent):
             await bot.send(ev,'只有管理员可以进行此操作！')
             return
         id=ev.message.extract_plain_text()
-        check = delete_bottle(id)
+        check = await delete_bottle(id)
         if not check:
             await bot.send(ev,'删除失败：id错误')
             return
@@ -136,7 +136,7 @@ async def show_drift(bot,ev:CQEvent):
             await bot.send(ev,'只有管理员可以进行此操作！')
             return
         id=ev.message.extract_plain_text()
-        msg = get_bott(bot,id)
+        msg = await get_bott(bot,id)
         if not msg:
             await bot.send(ev,'id错误')
             return

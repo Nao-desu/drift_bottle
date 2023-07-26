@@ -1,4 +1,4 @@
-from hoshino import Service,logger
+from hoshino import Service,priv
 from hoshino.typing import CQEvent
 from hoshino.util import DailyNumberLimiter
 import os,re,time
@@ -85,11 +85,25 @@ async def add_comment(bot,ev: CQEvent):
                     await bot.send(ev,'今天已经发表过评论啦，请明天再来',at_sender = True)
                     return
                 id = re.search(r'^bid:(\d*)',msg).group(1)
+                if comment == '删除':
+                    if not priv.check_priv(ev, priv.ADMIN):
+                        await bot.send(ev,'只有管理员可以进行此操作！')
+                        return
+                    check = delete_bottle(id)
+                    if not check:
+                        await bot.send(ev,'删除失败')
+                        return
+                    else:
+                        await bot.send(ev,'删除成功')
+                        return
                 result,ggid,uuid,msg = await add_comm(bot,comment,int(id),uid)
                 if not result:
                     await bot.send(ev,'你来晚了一步，他/她已经离开了这片海域。',at_sender = True)
                     return
                 if result == -1:
+                    return
+                if result == -2:
+                    await bot.send(ev,'评论失败：此漂流瓶已被销毁',at_sender = True)
                     return
                 clmt.increase(f'c{uid}')
                 await bot.send_group_msg(group_id = ggid,message = f'[CQ:at,qq={uuid}],你的漂流瓶id:{id}\n——————————\n{msg}\n——————————\n收到来自群{gid}：{uid}的评论:\n{comment}')              
@@ -100,5 +114,32 @@ async def add_comment(bot,ev: CQEvent):
     except Exception as e:
         await bot.send(ev,f'你的评论没有寄出\n{e}')
 
+@sv.on_prefix('删除漂流瓶')
+async def delete_drift(bot,ev:CQEvent):
+    try:
+        if not priv.check_priv(ev, priv.ADMIN):
+            await bot.send(ev,'只有管理员可以进行此操作！')
+            return
+        id=ev.message.extract_plain_text()
+        check = delete_bottle(id)
+        if not check:
+            await bot.send(ev,'删除失败：id错误')
+            return
+        await bot.send(ev,'删除成功')
+    except Exception as e:
+        await bot.send(ev,f'删除失败:{e}')
 
-
+@sv.on_prefix('查看漂流瓶')
+async def delete_drift(bot,ev:CQEvent):
+    try:
+        if not priv.check_priv(ev, priv.ADMIN):
+            await bot.send(ev,'只有管理员可以进行此操作！')
+            return
+        id=ev.message.extract_plain_text()
+        msg = get_bott(bot,id)
+        if not msg:
+            await bot.send(ev,'id错误')
+            return
+        await bot.send(ev,msg)
+    except Exception as e:
+        await bot.send(ev,f'发送失败:{e}')

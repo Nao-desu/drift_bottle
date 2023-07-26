@@ -105,8 +105,16 @@ async def get_drift(bot):#msg,comm,time,gid,uid,id
             return '','',0,0,0,False
         with open(join(FILE_PATH,f'bottle/data.json'),'r',encoding='utf-8') as f:
             bottle_list = json.load(f)
+        deleteed = 0
+        for i in bottle_list:
+            if i['time'] == -1:deleteed+=1
+        if deleteed == len(bottle_list):
+            return '','',0,0,0,False
         order = random.randint(0,len(bottle_list)-1)
         bottle = bottle_list[order]
+        while(bottle['time']==-1):
+            order = random.randint(0,len(bottle_list)-1)
+            bottle = bottle_list[order]
         bottle['time']+=1
         bottle_list[order] = bottle
         with open(join(FILE_PATH,f'bottle/data.json'),'w',encoding='utf-8') as f:
@@ -126,7 +134,45 @@ async def get_drift(bot):#msg,comm,time,gid,uid,id
     except Exception as e:
         print(e)
         return '','',0,0,0,False
-    
+
+async def get_bott(bot,id:str)-> str:
+    with open(join(FILE_PATH,f'bottle/data.json'),'r',encoding='utf-8') as f:
+        bottle_list = json.load(f)
+    check_bottle = False
+    for i in bottle_list:
+        if i['id'] == int(id):
+            check_bottle = True
+            bottle = i
+            break
+    if not check_bottle:
+        return False
+    msg = await adjust_img(bot,bottle['msg'],True,False)
+    msg = f'id:{id}\n{msg}'
+    return msg
+
+async def delete_bottle(id:str)->bool:
+    if not id.isdigit():return False
+    id = int(id)
+    with open(join(FILE_PATH,f'bottle/data.json'),'r',encoding='utf-8') as f:
+        bottle_list = json.load(f)
+    check_id = False 
+    for i in range(0,len(bottle_list)):
+        if bottle_list[i]['id'] == id:
+            check_id = True
+            break
+    if not check_id:return False
+    data = [{
+        'msg' : '',
+        'uid' : 0,
+        'gid' : 0,
+        'id'  : id,
+        'time' : -1,
+        'comment' : []     
+    }]
+    bottle_list[i] = data
+    with open(join(FILE_PATH,f'bottle/data.json'),'w',encoding='utf-8') as f:
+        json.dump(bottle_list,f,indent=4, ensure_ascii=False)
+    return True
 
 async def add_comm(bot,comment,id,uid):
     with open(join(FILE_PATH,f'bottle/data.json'),'r',encoding='utf-8') as f:
@@ -139,6 +185,8 @@ async def add_comm(bot,comment,id,uid):
     if not check_id:
         return -1,0,0,''
     bottle = bottle_list[i]
+    if bottle['time']==-1:
+        return -2,0,0,''
     comm = bottle['comment']
     if len(comm) == 5:
         comm.remove(comm[0])

@@ -8,16 +8,16 @@ sv_help = '''
 [扔漂流瓶] 把你的话装进漂流瓶内,会被谁捡到呢？
 [捡漂流瓶] 看看里面有啥
 '''
-tlmt = DailyNumberLimiter(1)
-plmt = DailyNumberLimiter(1)
-clmt = DailyNumberLimiter(1)
+tlmt = DailyNumberLimiter(5)#扔漂流瓶次数
+plmt = DailyNumberLimiter(5)#捡漂流瓶次数
+clmt = DailyNumberLimiter(5)#评论次数
 sv = Service('漂流瓶',help_=sv_help)
 
 @sv.on_prefix('扔漂流瓶')
 async def drop_bottle(bot,ev:CQEvent):
     uid = ev.user_id
     if not tlmt.check(f't{uid}'):
-        await bot.send(ev,'今天已经扔过漂流瓶啦，请明天再来',at_sender = True)
+        await bot.send(ev,f'今天已经扔过{tlmt}次漂流瓶啦，请明天再来',at_sender = True)
         return
     msg = str(ev.message)
     try:
@@ -37,7 +37,7 @@ async def drop_bottle(bot,ev:CQEvent):
 async def get_bottle(bot,ev:CQEvent):
     uuid = ev.user_id
     if not plmt.check(f'p{uuid}'):
-        await bot.send(ev,'你今天已经捡过漂流瓶了哦,明天再来吧',at_sender = True)
+        await bot.send(ev,f'你今天已经捡过{plmt}次漂流瓶了哦,明天再来吧',at_sender = True)
         return
     try:
         msg,comm,time,gid,uid,id = await get_drift(bot)
@@ -82,7 +82,7 @@ async def add_comment(bot,ev: CQEvent):
             idmatch = r'^bid:(\d*)'
             if re.match(idmatch,msg):
                 if not clmt.check(f'c{uid}'):
-                    await bot.send(ev,'今天已经发表过评论啦，请明天再来',at_sender = True)
+                    await bot.send(ev,f'今天已经发表过{clmt}次评论啦，请明天再来',at_sender = True)
                     return
                 id = re.search(r'^bid:(\d*)',msg).group(1)
                 if comment == '删除':

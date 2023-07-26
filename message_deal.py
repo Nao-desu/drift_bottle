@@ -161,14 +161,14 @@ async def delete_bottle(id:str)->bool:
             check_id = True
             break
     if not check_id:return False
-    data = [{
+    data = {
         'msg' : '',
         'uid' : 0,
         'gid' : 0,
         'id'  : id,
         'time' : -1,
         'comment' : []     
-    }]
+    }
     bottle_list[i] = data
     with open(join(FILE_PATH,f'bottle/data.json'),'w',encoding='utf-8') as f:
         json.dump(bottle_list,f,indent=4, ensure_ascii=False)

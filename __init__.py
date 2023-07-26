@@ -130,7 +130,7 @@ async def delete_drift(bot,ev:CQEvent):
         await bot.send(ev,f'删除失败:{e}')
 
 @sv.on_prefix('查看漂流瓶')
-async def delete_drift(bot,ev:CQEvent):
+async def show_drift(bot,ev:CQEvent):
     try:
         if not priv.check_priv(ev, priv.ADMIN):
             await bot.send(ev,'只有管理员可以进行此操作！')
